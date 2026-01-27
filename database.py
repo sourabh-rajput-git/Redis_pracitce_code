@@ -5,7 +5,7 @@ import os
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DB_URL")
+DATABASE_URL = os.getenv("postgresql://postgres:root@localhost/redis_test_db")
 
 engine = create_engine(DATABASE_URL)
 
