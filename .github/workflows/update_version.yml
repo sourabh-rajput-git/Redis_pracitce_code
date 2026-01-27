@@ -1,0 +1,23 @@
+name: Update Version
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+      - staging
+      - dev
+      - 'BUG-FIX-*'
+
+jobs:
+  update-version:
+    if: github.event.pull_request.merged == true
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
+    with:
+      fetch-depth: 0
