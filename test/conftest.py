@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 
 from database import Base, get_db
 
+
 # Use SQLite for tests
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 
@@ -35,6 +36,7 @@ def db():
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
+
 
 @pytest.fixture
 def client(db):
