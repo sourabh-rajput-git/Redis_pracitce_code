@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from database import Base, get_db
-from main import app
+
 
 # Use SQLite for tests
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
@@ -27,6 +27,7 @@ def override_get_db():
     finally:
         db.close()
 
+from main import app
 # Override dependency
 app.dependency_overrides[get_db] = override_get_db
 
