@@ -43,7 +43,6 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
-
 @router.get("/get-all-users", response_model=list[schemas.UserResponse])
 def get_users(db: Session = Depends(get_db)):
     """
@@ -153,7 +152,11 @@ app.dependency_overrides[get_db] = override_get_db
         q.enqueue(process_image_task, unique_filename, file_path)
         return db_user
     except Exception as e:
-        return {"message": e.args}
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
     
 
 @router.get("/find-file/{user_id}", response_model=schemas.UserUpload)
@@ -171,9 +174,12 @@ async def find_file(user_id: int, db: Session = Depends(get_db)):
         }
     #Fall back to db
     db_user = db.query(User).filter(User.id == user_id).first()
-    
+    #Check if the user exists
     if not db_user :
         raise HTTPException(status_code=404, detail="User not found")
+    #check if the user has uploaded a file or not
+    if not db_user.file_path:
+        raise HTTPException(status_code=404, detail="No file found")
     
     # Store in Redis for next time
     print("Found in DB")

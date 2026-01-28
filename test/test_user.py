@@ -49,7 +49,7 @@ def test_update_user(client):
 def test_update_user_not_found(client):
     response = client.put(
         "/users/users/007",
-        json={"name": "Does Not Exist"}
+        json={"name": "Sourabh"}
     )
 
     assert response.status_code == 404
