@@ -15,19 +15,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Stop existing container (if running)
-        run: |
-          docker stop fastapi-app || true
-          docker rm fastapi-app || true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
 
-      - name: Build Docker image
+      - name: Create virtual environment
         run: |
-          docker build -t fastapi-app:latest .
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Run FastAPI container
+      - name: Stop existing FastAPI app (if running)
         run: |
-          docker run -d \
-            --name fastapi-app \
-            -p 8000:8000 \
-            --env-file .env \
-            fastapi-app:latest
+          pkill -f "uvicorn main:app" || true
+
+      - name: Start FastAPI app
+        run: |
+          source venv/bin/activate
+          nohup uvicorn main:app \
+            --host 0.0.0.0 \
+            --port 8000 \
+            --reload > fastapi.log 2>&1 &
