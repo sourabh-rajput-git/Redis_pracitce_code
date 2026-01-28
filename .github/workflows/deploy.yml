@@ -1,48 +1,33 @@
-name: CD Pipeline
+name: FastAPI CD
+
 on:
-  push:
-    branches: [main]
+  workflow_run:
+    workflows: ["FastAPI CI"]
+    types:
+      - completed
+
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: self-hosted
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            # Update package index and install dependencies
-            sudo apt-get update -y
-            sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+      - name: Stop existing container (if running)
+        run: |
+          docker stop fastapi-app || true
+          docker rm fastapi-app || true
 
-            # Add Docker's official GPG key
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-            sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+      - name: Build Docker image
+        run: |
+          docker build -t fastapi-app:latest .
 
-            # Install Docker
-            sudo apt-get update -y
-            sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-
-            # Add the SSH user to the Docker group
-            sudo usermod -aG docker ${{ secrets.SSH_USERNAME }}
-
-            # Install Docker Compose
-            sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-
-            # Verify installations
-            docker --version
-            docker-compose --version
-
-            # Navigate to the project directory and deploy
-            cd /home/ubuntu/
-            git clone https://github.com/sourabh-rajput-git/Redis_pracitce_code
-            cd Redis_pracitce_code/
-            git fetch origin main
-            git reset --hard origin/main
-            docker-compose up -d --build
+      - name: Run FastAPI container
+        run: |
+          docker run -d \
+            --name fastapi-app \
+            -p 8000:8000 \
+            --env-file .env \
+            fastapi-app:latest
