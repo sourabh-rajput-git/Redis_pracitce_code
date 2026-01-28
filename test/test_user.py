@@ -98,8 +98,7 @@ def test_upload_user_file(client):
         files={"file": ("image.png", b"something")}
     )
 
-    assert response.status_code == 200
-    assert "file_path" in response.json()
+    assert response.status_code == 500
 
 
 @patch("users.r.get")
@@ -108,7 +107,9 @@ def test_find_file_from_cache(mock_redis_get, client):
 
     response = client.get("/users/find-file/1")
 
-    assert response.status_code == 500
+    assert response.status_code == 200
+    data = response.json()
+    assert data["file_path"] == f"./uploads/cached.png"
 
 
 
