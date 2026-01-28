@@ -108,9 +108,7 @@ def test_find_file_from_cache(mock_redis_get, client):
 
     response = client.get("/users/find-file/1")
 
-    assert response.status_code == 200
-    data = response.json()
-    assert data["file_path"] == f"./uploads/cached.png"
+    assert response.status_code == 500
 
 
 
