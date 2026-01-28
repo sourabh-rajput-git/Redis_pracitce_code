@@ -5,7 +5,9 @@ import os
 
 load_dotenv()
 
-engine = create_engine("postgresql://postgres:root@localhost/redis_test_db")
+DATABASE_URL = os.getenv("DB_URL")
+
+engine = create_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
