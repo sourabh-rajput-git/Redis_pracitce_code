@@ -10,7 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: sqlite:///./test.
+      DB_URL: ${{ secrets.DB_URL }}
       
     services:
       redis:
