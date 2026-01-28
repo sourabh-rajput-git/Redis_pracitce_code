@@ -33,7 +33,6 @@ app.dependency_overrides[get_db] = override_get_db
 
 @pytest.fixture(scope="session")
 def db():
-    Base.metadata.bind = engine
     Base.metadata.create_all()
     yield
     Base.metadata.drop_all()
